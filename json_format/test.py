@@ -2,7 +2,6 @@
 
 import json
 def main():
-    import json
     f = open("poker.json", "r", encoding='utf-8')
     newarr = {}
     dic = json.loads(f.read())
