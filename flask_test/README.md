@@ -1,6 +1,6 @@
 
 
-使用 Python 的 Web 框架，做一个 Web 版本 留言簿 应用。
+这里是利用flask做出的一个类知了问答网站，里面也包含了文章编辑和__留言__功能。
 
 [阅读资料：Python 有哪些 Web 框架](http://v2ex.com/t/151643#reply53)
 
@@ -29,6 +29,7 @@
 
 这里选择flask作为web框架
 
+- 环境用virtualenv或者anaconda都可以
 安装 virtualenv
 
 ```
