@@ -93,6 +93,19 @@ class Money2Word(object):
 
 class Word2Money(object):
     def __init__(self, word):
+        """
+        :param word: 用户传入的中文字符串
+        初始化参数，包括：
+        {
+            is_int ：int/float    是否为纯整数
+            word：str    用作转换的中文金额
+            int_part：str    整数部分字符串
+            dec_part：str    小数部分字符串
+            int_level：list    整数部分的单位列表
+            trans_tab：dict    映射表
+            pattern：_sre.SRE_Pattern    正则表达式compile规则
+        }
+        """
         if word.endswith('圆'):
             self.int_part = word
             self.is_int = True
@@ -100,16 +113,20 @@ class Word2Money(object):
             self.int_part = word[:word.index('圆') + 1]
             self.dec_part = word[word.index('圆') + 1:]
             self.is_int = False
-        print(self.int_part)
-        print(self.dec_part)
+        self.word = word
         self.int_level = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000,
                            100000000000, 1000000000000]
-        self.dec_level = [0.1, 0.01]
         self.trans_tab = str.maketrans('零壹贰叁肆伍陆柒捌玖', '0123456789')
         self.pattern = re.compile('(?:(.*?)兆)?(?:(.*?)千)?(?:(.*?)百)?(?:(.*?)拾)?(?:(.*?)亿)?(?:(.*?)千)?(?:(.*?)佰)'
                                   '?(?:(.*?)拾)?(?:(.*?)万)?(?:(.*?)仟)?(?:(.*?)佰)?(?:(.*?)拾)?(.*?)圆')
 
     def data_check(self):
+        """
+        数据检查，是否符合输入要求
+        :return: 传入的数据不是字符串类型或者长度越界则返回False，否则返回True
+        """
+        if not isinstance(self.word, str):
+            return False
         if self.is_int:
             if len(self.int_part) > 26:
                 return False
@@ -121,8 +138,12 @@ class Word2Money(object):
             else:
                 return True
 
-
     def word_format(self, word):
+        """
+
+        :param word: 对传入的word字符串进行映射处理
+        :return: 根据传入字符串的长度进行处理后执行映射
+        """
         if len(word) > 1:
             return word[-1].translate(self.trans_tab)
         elif len(word) == 0:
@@ -131,18 +152,24 @@ class Word2Money(object):
 
     def word2number(self):
         if self.data_check():
+            # 处理纯整数
             if self.is_int:
+                # 用正则表达式按照模板检索（从兆位到个位，没有对应项则为空）
                 word_list = re.findall(self.pattern, self.int_part)[0]
+                # 按照映射表执行映射后组合成数字列表
                 number_list = list(reversed(list(map(self.word_format, word_list))))
+                # 将数字列表与数字单位列表的对应索引项进行相乘后求和
                 print(sum(
                     [int(number_list[i]) * self.int_level[i] for i in range(len(number_list))]
                 ))
             else:
+                # 整数部分
                 int_word_list = re.findall(self.pattern, self.int_part)[0]
                 int_number_list = list(reversed(list(map(self.word_format, int_word_list))))
                 int_number = sum(
                     [int(int_number_list[i]) * self.int_level[i] for i in range(len(int_number_list))]
                 )
+                # 处理小数部分，根据长度分别处理
                 if len(self.dec_part) == 4:
                     dec_word_list = list(self.dec_part[0] + self.dec_part[2])
                     dec_number_list = list(map(self.word_format, dec_word_list))
@@ -159,9 +186,9 @@ class Word2Money(object):
 
 
 if __name__ == '__main__':
-    Money2Word(9999999999999.19).number2word()
-    Money2Word(9029999.01).number2word()
-    Money2Word(129999909).number2word()
-    # Word2Money('玖兆玖千玖百玖拾玖亿玖千玖佰玖拾玖万玖仟玖佰玖拾玖圆壹角').word2number()
-
-
+    # Money2Word(9999999999999.19).number2word()
+    # Money2Word(9029999.01).number2word()
+    # Money2Word(129999909).number2word()
+    Word2Money('玖兆玖千玖百玖拾玖亿玖千玖佰玖拾玖万玖仟玖佰玖拾玖圆壹角').word2number()
+    Word2Money('玖兆玖千玖百玖拾玖亿玖千玖佰玖拾玖万玖仟玖佰玖拾玖圆零玖分').word2number()
+    Word2Money('壹亿贰千玖佰玖拾玖万玖仟玖佰零玖圆').word2number()
